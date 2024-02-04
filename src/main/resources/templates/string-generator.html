@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Random Strings Generator</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+<h1>Random String Generator</h1>
+This form allows to generate random text strings.
+<form id="randomStringForm" action="#" th:action="@{/string-generator}" th:object="${uidatamodel}" method="GET">
+    <p>Generate <input type="text" th:field="*{numberOfLines}" th:size="8" /> random strings</p>
+    <p>Each string should be <input type="text" th:field="*{stringsLength}" th:size="8" /> characters long</p>
+    Which characters are allowed to occur in the strings?<br>
+    <input type="checkbox" id="numericDigits" name="numericDigits" th:field="${uidatamodel.numericAllowed}" th:checked="${uidatamodel.numericAllowed}" /><label for="numericDigits"> Numeric digits (0-9)</label><br>
+    <input type="checkbox" id="upperCaseLetters" name="upperCaseLetters" th:field="${uidatamodel.upperCaseAllowed}" th:checked="${uidatamodel.upperCaseAllowed}" /><label for="upperCaseLetters"> Uppercase letters (A-Z)</label><br>
+    <input type="checkbox" id="lowerCaseLetters" name="lowerCaseLetters" th:field="${uidatamodel.lowerCaseAllowed}" th:checked="${uidatamodel.lowerCaseAllowed}" /><label for="lowerCaseLetters"> Lowercase letters (a-z)</label><br><br>
+
+    Do you want each string to be unique?<br>
+    <label>
+        <input type="radio" id="uniqueAllowed" th:field="*{uniqueAllowed}" th:value="true" th:checked="${uidatamodel.uniqueAllowed}" /> Yes
+    </label>
+    <label>
+        <input type="radio" id="uniqueNotAllowed" th:field="*{uniqueAllowed}" th:value="false" /> No
+    </label>
+    <p><input type="button" value="Get Strings" onclick="submitForm();" /> <input type="reset" value="Reset Form" /></p>
+</form>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    function submitForm() {
+        var form = $('#randomStringForm');
+        var formData = form.serialize();
+        var numberOfLines = $('#numberOfLines').val();
+        var stringsLength = $('#stringsLength').val();
+        var includeUpperCase = $('#upperCaseLetters').prop('checked');
+        var includeLowerCase = $('#lowerCaseLetters').prop('checked');
+        var includeIntegers = $('#numericDigits').prop('checked');
+        var uniqueStrings = $('#uniqueAllowed').prop('checked');
+
+        $.ajax({
+            type: 'GET',
+            url: '/random?n=' + numberOfLines + '&len=' + stringsLength +
+                '&includeUpperCase=' + includeUpperCase +
+                '&includeLowerCase=' + includeLowerCase +
+                '&includeIntegers=' + includeIntegers +
+                '&uniqueStrings=' + uniqueStrings,
+            data: formData,
+            success: function (data) {
+                window.location.href = '/results?data=' + encodeURIComponent(JSON.stringify(data)) + '&numberOfLines=' + numberOfLines + '&stringsLength=' + stringsLength +
+                    '&includeUpperCase=' + includeUpperCase +
+                    '&includeLowerCase=' + includeLowerCase +
+                    '&includeIntegers=' + includeIntegers +
+                    '&uniqueStrings=' + uniqueStrings;
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    }
+    /*]]>*/
+</script>
+</body>
+</html>

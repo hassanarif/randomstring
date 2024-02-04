@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html xmlns:th="https://www.thymeleaf.org">
+<head>
+    <title>Results</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+</head>
+<body>
+<h1>Random String Generator</h1>
+<p>Here are your random strings:</p>
+<div id="randomStrings" th:each="dataItem : ${data.getData()}" th:text="${dataItem}"></div>
+<button id="againButton">Again!</button>
+<button id="readFromDatabaseButton">Read from Database</button>
+<button id="goBackButton">Go Back</button>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var urlParams = new URLSearchParams(window.location.search);
+    var jsonData = JSON.parse(decodeURIComponent(urlParams.get('data')));
+    var numberOfLines = urlParams.get('numberOfLines');
+    var stringsLength = urlParams.get('stringsLength');
+    var data = jsonData.data;
+    var status = jsonData.status;
+    var includeUpperCase = urlParams.get('includeUpperCase');
+    var includeLowerCase = urlParams.get('includeLowerCase');
+    var includeIntegers = urlParams.get('includeIntegers');
+    var uniqueStrings = urlParams.get('uniqueStrings');
+    $('#againButton').click(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/random?n=' + numberOfLines + '&len=' + stringsLength +
+                '&includeUpperCase=' + includeUpperCase +
+                '&includeLowerCase=' + includeLowerCase +
+                '&includeIntegers=' + includeIntegers +
+                '&uniqueStrings=' + uniqueStrings,
+            success: function (newData) {
+                $('div#randomStrings').empty();
+                for (var i = 0; i < newData.data.length; i++) {
+                    $('#randomStrings').append('<div>' + newData.data[i] + '</div>');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    });
+    $('#goBackButton').click(function () {
+        window.location.href = '/string-generator';
+    });
+
+    $('#readFromDatabaseButton').click(function () {
+        $.ajax({
+            type: 'GET',
+            url: '/read-from-database',
+            success: function (databaseStrings) {
+                // Display the database strings on the page
+                $('div#randomStrings').empty();
+                for (var i = 0; i < databaseStrings.length; i++) {
+                    var dto = databaseStrings[i];
+                    $('#randomStrings').append('<div>' + dto.randomstring + '</div>');
+                }
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+    });
+    /*]]>*/
+</script>
+</body>
+</html>
